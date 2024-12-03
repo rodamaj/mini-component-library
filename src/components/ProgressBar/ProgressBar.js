@@ -23,18 +23,87 @@ const SIZES = {
   },
 };
 
-const ProgressBar = ({ value, size }) => {
-  const style = SIZES[size];
-
-  return (<>
-    <VisuallyHidden>
-      <label for='progress-bar'>Loaded</label>
-    </VisuallyHidden>
-    <Wrapper style={style} id='progress-bar' value={value} max={100}>{value}</Wrapper>
-  </>);
+const STYLES = {
+  small: {
+    height: 8,
+    padding: 0,
+    radius: 4,
+  },
+  medium: {
+    height: 12,
+    padding: 0,
+    radius: 4,
+  },
+  large: {
+    height: 24,
+    padding: 4,
+    radius: 8,
+  },
 };
 
-const Wrapper = styled.progress`
+const ProgressBarJosue = ({ value, size }) => {
+  const style = SIZES[size];
+
+  return (
+    <>
+      <VisuallyHidden>
+        <label for='progress-bar'>Loaded</label>
+      </VisuallyHidden>
+      <WrapperJosue style={style} id='progress-bar' value={value} max={100}>
+        {value}
+      </WrapperJosue>
+    </>
+  );
+};
+
+const ProgressBar = ({ value, size }) => {
+  const style = STYLES[size];
+  if (!style) {
+    throw new Error(`Unknown size passed to ProgressBar: ${size}`);
+  }
+
+  return (
+    <Wrapper
+      role='progressbar'
+      aria-valuenow={value}
+      aria-valuemin='0'
+      aria-valuemax='100'
+      style={{
+        '--padding': style.padding + 'px',
+        '--radius': style.radius + 'px',
+      }}
+    >
+      <VisuallyHidden>{value}%</VisuallyHidden>
+      <BarWrapper>
+        <Bar
+          style={{ '--width': value + '%', '--height': style.height + 'px' }}
+        />
+      </BarWrapper>
+    </Wrapper>
+  );
+};
+
+const Wrapper = styled.div`
+  background-color: ${COLORS.transparentGray15};
+  box-shadow: inset 0px 2px 4px ${COLORS.transparentGray35};
+  border-radius: var(--radius);
+  padding: var(--padding);
+`;
+
+const BarWrapper = styled.div`
+  border-radius: 4px;
+  /* trim off cormers when progress bar is near full */
+  overflow: hidden;
+`;
+
+const Bar = styled.div`
+  width: var(--width);
+  height: var(--height);
+  background-color: ${COLORS.primary};
+  border-radius: 4px 0 0 4px;
+`;
+
+const WrapperJosue = styled.progress`
   box-shadow: inset 0px 2px 4px ${COLORS.transparentGray35};
   border-radius: var(--outer-radius);
   height: var(--height);
@@ -49,8 +118,8 @@ const Wrapper = styled.progress`
     background-color: ${COLORS.primary};
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
-    border-top-right-radius: ${p => calculateRightRadius(p.value)}px;
-    border-bottom-right-radius: ${p => calculateRightRadius(p.value)}px;
+    border-top-right-radius: ${(p) => calculateRightRadius(p.value)}px;
+    border-bottom-right-radius: ${(p) => calculateRightRadius(p.value)}px;
   }
 `;
 
@@ -72,6 +141,5 @@ function calculateRightRadius(value) {
     return 2 * value - 196;
   }
 }
-
 
 export default ProgressBar;
